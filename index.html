@@ -119,8 +119,8 @@
             align-items: center;
             justify-content: center;
             background-color: #e0e0e0; /* Cor do fundo da barra de progresso (parte não preenchida) */
-            box-shadow: 0 0 30px rgba(60, 160, 250, 0.5); /* Brilho sutil externo */
-            animation: ring-glow 3s ease-in-out infinite alternate; /* Animação de brilho */
+            /* Removida a sombra externa */
+            animation: ring-glow 3s ease-in-out infinite alternate; /* Animação de brilho (opcional, pode ser removida se quiser sem brilho nenhum) */
         }
 
         /* A parte que preenche o anel de progresso (conic-gradient) */
@@ -146,9 +146,10 @@
         }
 
         /* Keyframes para a animação de brilho do anel */
+        /* Mantido, mas sem a box-shadow. Se quiser remover o brilho por completo, esta regra e a animação em #repro-loading-visual podem ser removidas */
         @keyframes ring-glow {
-            0% { box-shadow: 0 0 20px rgba(60, 160, 250, 0.5); }
-            100% { box-shadow: 0 0 40px rgba(79, 70, 229, 0.7); }
+            0% { } /* Sem sombra, apenas para compatibilidade com a animação */
+            100% { } /* Sem sombra, apenas para compatibilidade com a animação */
         }
     </style>
 </head>
@@ -203,7 +204,7 @@
                 © 2025 - Mv. Pedro Henrique | Guia de estudos.
                 Desenvolvido por Pedro Henrique com base em conteúdos online.
             </p>
-            <a href="#" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105">
+            <a href="https://repro-fiv.vercel.app/#/" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105">
                 Voltar para o site de estudos
             </a>
         </div>
