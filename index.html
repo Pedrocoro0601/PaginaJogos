@@ -272,9 +272,32 @@
             max-height: 120px; /* Limite de altura para logos */
             object-fit: contain; /* Garante que a imagem se ajuste sem cortar */
         }
+
+        /* Estilos para a mensagem de desktop */
+        #desktop-message-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #1a202c; /* Fundo escuro */
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+            z-index: 10000; /* Acima de tudo */
+        }
     </style>
 </head>
 <body>
+    <!-- Overlay para mensagem em desktop -->
+    <div id="desktop-message-overlay" class="hidden">
+        <p>Este site é otimizado para celulares.<br>Por favor, acesse-o em um dispositivo móvel.</p>
+    </div>
+
     <!-- Tela de Carregamento -->
     <div id="loading-screen">
         <!-- O elemento visual principal da animação de carregamento -->
@@ -362,17 +385,34 @@
             const mainContent = document.getElementById('main-content');
             const sponsorTitle = document.getElementById('sponsor-title');
             const sponsorLogoItems = document.querySelectorAll('.sponsor-logo-item');
+            const desktopMessageOverlay = document.getElementById('desktop-message-overlay');
 
-            const intervalTime = 40; // Milliseconds for each step of the loading animation
+            const intervalTime = 40; // Milissegundos para cada etapa da animação de carregamento
             const totalSteps = 100;
 
             const sponsorScreenInitialDelay = 500; // Delay before sponsor screen becomes active
             const titleAnimationDuration = 1500; // Duration for fade-in/scale-up animation
-            const titleDisplayDuration = 1500; // How long each title text remains fully visible after animation (shortened)
-            const mobileWordDisplayDuration = 1000; // Duration for each word in mobile sequence
+            const titleDisplayDuration = 1500; // How long each title text remains fully visible after animation
             const sponsorLogoDisplayDuration = 2000; // 2 seconds per logo
+            const smallAudioDelay = 300; // Small delay AFTER audio trigger to prevent Tone.js errors
 
-            // Tone.js setup for audio cue
+            // Helper delay function
+            const delay = ms => new Promise(res => setTimeout(res, ms));
+
+            // Check if it's a mobile device
+            const isMobileDevice = window.innerWidth <= 768; // Tailwind's 'md' breakpoint
+
+            if (!isMobileDevice) {
+                // Display desktop message and hide everything else
+                desktopMessageOverlay.classList.remove('hidden');
+                // Ensure all other elements are hidden if they somehow become visible
+                loadingScreen.classList.add('hidden');
+                sponsorScreen.classList.add('hidden');
+                mainContent.classList.add('hidden');
+                return; // Stop further script execution for desktop
+            }
+
+            // Tone.js setup for audio cue (only for mobile execution)
             const noiseSynth = new Tone.NoiseSynth({
                 noise: {
                     type: "white" // White noise for a broad spectrum sound
@@ -384,23 +424,6 @@
                     release: 0.1  // Fast release
                 }
             }).toDestination();
-
-            // Function to handle typing effect for a given element
-            const typeText = (element, text, delay = 70) => {
-                return new Promise(resolve => {
-                    element.textContent = ''; // Clear previous text
-                    let i = 0;
-                    const typingInterval = setInterval(() => {
-                        if (i < text.length) {
-                            element.textContent += text.charAt(i);
-                            i++;
-                        } else {
-                            clearInterval(typingInterval);
-                            resolve();
-                        }
-                    }, delay);
-                });
-            };
 
             // --- Loading Screen Logic ---
             let progress = 0;
@@ -415,67 +438,75 @@
 
                     // --- Sponsor Screen Logic ---
                     setTimeout(async () => { // Activate sponsor screen after initial delay
+                        await Tone.start(); // Ensure audio context is started ONCE
                         sponsorScreen.classList.add('active');
+                        await delay(100); // Small pause to allow screen to become active
 
-                        // 1. Show "Oferecimento" with typing and burst effect
-                        sponsorTitle.style.opacity = 0; // Ensure it starts hidden for burst effect
-                        sponsorTitle.style.transform = 'scale(0.8)'; // Set initial scale for burst
+                        // Sequence of title animations and logo cycling
+                        const runSponsorSequence = async () => {
+                            // 1. Show "Oferecimento" with burst effect
+                            sponsorTitle.textContent = "Oferecimento";
+                            sponsorTitle.classList.remove('active'); // Reset animation state
+                            sponsorTitle.style.opacity = 0; // Ensure it starts hidden for burst effect
+                            sponsorTitle.style.transform = 'scale(0.8)'; // Set initial scale for burst
+                            await delay(50); // Small pause to apply initial styles
 
-                        await typeText(sponsorTitle, "Oferecimento", 70); // Type out "Oferecimento"
-                        sponsorTitle.classList.add('active'); // Trigger burst-reveal animation after typing
-                        noiseSynth.triggerAttackRelease("8n"); // Play audio cue
-                        
-                        await new Promise(resolve => setTimeout(resolve, titleAnimationDuration + titleDisplayDuration)); // Wait for burst animation + display
+                            sponsorTitle.classList.add('active'); // Trigger burst-reveal animation
+                            noiseSynth.triggerAttackRelease("8n", Tone.now()); // Play audio cue
+                            await delay(smallAudioDelay); // Crucial: Delay after audio trigger
 
-                        // Hide "Oferecimento"
-                        sponsorTitle.classList.remove('active'); // Start fade out
-                        await new Promise(resolve => setTimeout(resolve, titleAnimationDuration)); // Wait for fade-out to complete
+                            await delay(titleAnimationDuration + titleDisplayDuration - smallAudioDelay); // Wait for burst animation + display (adjust for audio delay)
 
-                        const isMobile = window.innerWidth <= 768; // Check for mobile
+                            // Hide "Oferecimento"
+                            sponsorTitle.classList.remove('active'); // Start fade out
+                            await delay(titleAnimationDuration); // Wait for fade-out to complete
 
-                        if (isMobile) {
-                            const mobilePhrase = "Laboratórios FIV disponíveis em Uberaba";
-                            const words = mobilePhrase.split(' ');
-                            
-                            for (let i = 0; i < words.length; i++) {
-                                sponsorTitle.style.opacity = 0; // Ensure it starts hidden for burst effect
-                                sponsorTitle.style.transform = 'scale(0.8)'; // Set initial scale for burst
-                                
-                                await typeText(sponsorTitle, words[i], 70); // Type out each word
-                                sponsorTitle.classList.add('active'); // Trigger burst-reveal for each word
-                                noiseSynth.triggerAttackRelease("8n"); // Play audio cue for each word
+                            // 2. Show "Laboratórios FIV disponíveis em Uberaba"
+                            sponsorTitle.textContent = "Laboratórios FIV disponíveis em Uberaba";
+                            sponsorTitle.classList.remove('active'); // Reset animation state
+                            sponsorTitle.style.opacity = 0; // Ensure starts hidden
+                            sponsorTitle.style.transform = 'scale(0.8)'; // Initial scale
+                            await delay(50); // Pause to apply initial styles
 
-                                await new Promise(resolve => setTimeout(resolve, titleAnimationDuration + mobileWordDisplayDuration)); // Wait for word animation + display
-                                sponsorTitle.classList.remove('active'); // Fade out current word
-                                await new Promise(resolve => setTimeout(resolve, titleAnimationDuration)); // Wait for fade-out
-                            }
-                        }
+                            sponsorTitle.classList.add('active'); // Trigger burst-reveal for this new text
+                            noiseSynth.triggerAttackRelease("8n", Tone.now()); // Play audio cue
+                            await delay(smallAudioDelay); // Crucial: Delay after audio trigger
 
-                        // Start cycling logos
-                        let logoCycleIndex = 0;
-                        const showNextLogo = () => {
-                            if (logoCycleIndex > 0) {
-                                sponsorLogoItems[logoCycleIndex - 1].classList.remove('active'); // Hide previous
-                            }
+                            await delay(titleAnimationDuration + titleDisplayDuration - smallAudioDelay); // Wait for animation + display
 
-                            if (logoCycleIndex < sponsorLogoItems.length) {
-                                sponsorLogoItems[logoCycleIndex].classList.add('active'); // Show current
-                                logoCycleIndex++;
-                                setTimeout(showNextLogo, sponsorLogoDisplayDuration);
-                            } else {
-                                // All logos displayed
-                                sponsorScreen.classList.remove('active'); // Fade out sponsor screen
-                                mainContent.classList.remove('hidden'); // Show main content immediately
+                            // Hide this title before logos
+                            sponsorTitle.classList.remove('active'); // Start fade out
+                            await delay(titleAnimationDuration); // Wait for fade-out to complete
 
-                                sponsorScreen.addEventListener('transitionend', function handleSponsorFadeOutEnd() {
-                                    sponsorScreen.removeEventListener('transitionend', handleSponsorFadeOutEnd);
-                                    sponsorScreen.remove(); // Remove from DOM after fade out
-                                }, { once: true });
-                            }
-                        };
-                        showNextLogo(); // Initiate logo cycle
+                            // 3. Start cycling logos
+                            let logoCycleIndex = 0;
+                            const showNextLogo = async () => { // Make showNextLogo async
+                                if (logoCycleIndex > 0) {
+                                    sponsorLogoItems[logoCycleIndex - 1].classList.remove('active'); // Hide previous
+                                }
 
-                    }, sponsorScreenInitialDelay);
+                                if (logoCycleIndex < sponsorLogoItems.length) {
+                                    sponsorLogoItems[logoCycleIndex].classList.add('active'); // Show current
+                                    logoCycleIndex++;
+                                    await delay(sponsorLogoDisplayDuration); // Use await delay here
+                                    showNextLogo(); // Recursively call for next logo
+                                } else {
+                                    // All logos displayed
+                                    sponsorScreen.classList.remove('active'); // Fade out sponsor screen
+                                    mainContent.classList.remove('hidden'); // Show main content immediately
+
+                                    sponsorScreen.addEventListener('transitionend', function handleSponsorFadeOutEnd() {
+                                        sponsorScreen.removeEventListener('transitionend', handleSponsorFadeOutEnd);
+                                        sponsorScreen.remove(); // Remove from DOM after fade out
+                                    }, { once: true });
+                                }
+                            };
+                            showNextLogo(); // Initiate logo cycle
+
+                        }; // End of runSponsorSequence
+                        runSponsorSequence(); // Start the entire sponsor sequence
+
+                    }, sponsorScreenInitialDelay); // End of initial setTimeout for sponsor screen activation
                 }
             }, intervalTime);
 
