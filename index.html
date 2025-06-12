@@ -4,12 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jogos Interativos</title>
-    <!-- Google Font: Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Google Font: Inter (main font) and Dosis (for sponsor title) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Dosis:wght@400;700;800&display=swap" rel="stylesheet">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tone.js CDN for audio effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -26,14 +28,13 @@
             color: #3b82f6; /* Equivalente a blue-500 */
         }
 
-        /* Animação de gradiente para o título principal */
+        /* Animação de gradiente para o título principal (aplicado a cada letra individual) */
         .animated-gradient-text {
             background: linear-gradient(to right, #3b82f6, #4f46e5, #3b82f6); /* Gradiente azul para índigo */
             background-size: 200% auto;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             animation: gradient-animation 3s ease infinite alternate; /* Animação mais lenta e suave */
-            display: inline-block; /* Essencial para background-clip funcionar */
         }
 
         /* Animação de gradiente para os botões */
@@ -119,7 +120,6 @@
             align-items: center;
             justify-content: center;
             background-color: #e0e0e0; /* Cor do fundo da barra de progresso (parte não preenchida) */
-            /* Removida a sombra externa */
             animation: ring-glow 3s ease-in-out infinite alternate; /* Animação de brilho (opcional, pode ser removida se quiser sem brilho nenhum) */
         }
 
@@ -146,10 +146,131 @@
         }
 
         /* Keyframes para a animação de brilho do anel */
-        /* Mantido, mas sem a box-shadow. Se quiser remover o brilho por completo, esta regra e a animação em #repro-loading-visual podem ser removidas */
         @keyframes ring-glow {
             0% { } /* Sem sombra, apenas para compatibilidade com a animação */
             100% { } /* Sem sombra, apenas para compatibilidade com a animação */
+        }
+
+        /* Estilo para as letras caindo */
+        .falling-letter {
+            display: inline-block; /* Permite que transform funcione por letra */
+            opacity: 0;
+            transform: translateY(-50px); /* Inicia 50px acima */
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out; /* Transição suave */
+        }
+
+        /* Estilos da Tela de Patrocinadores */
+        #sponsor-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #f0f2f5; /* Fundo cinza claro como a tela de carregamento */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9998; /* Abaixo da tela de carregamento, acima do conteúdo principal */
+            opacity: 0; /* Inicia oculto */
+            pointer-events: none; /* Não interage quando oculto */
+            transition: opacity 1s ease-out; /* Transição suave para aparecer/desaparecer */
+        }
+
+        #sponsor-screen.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* Estilo para o título do patrocinador com nova animação e sem sombra */
+        .sponsor-title-transition {
+            opacity: 0;
+            /* Inicia ligeiramente menor para uma entrada suave */
+            transform: scale(0.95);
+            transition: opacity 0.8s ease-in-out, transform 0.8s ease-in-out; /* Transição suave */
+            background: linear-gradient(to right, #3b82f6, #4f46e5, #3b82f6); /* Gradiente azul para índigo */
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-animation 3s ease infinite alternate; /* Animação de gradiente contínua */
+            font-family: 'Dosis', sans-serif; /* Fonte arredondada */
+            font-weight: 800; /* Dosis mais grossa */
+            text-align: center; /* Centraliza o texto */
+            /* Ajuste de tamanho para celular e desktop */
+            font-size: 3rem; /* Equivalente a text-5xl para celular */
+        }
+
+        /* Responsividade para desktop: aumenta o tamanho da fonte */
+        @media (min-width: 640px) { /* sm breakpoint */
+            .sponsor-title-transition {
+                font-size: 4rem; /* Equivalente a text-6xl */
+            }
+        }
+        @media (min-width: 768px) { /* md breakpoint */
+            .sponsor-title-transition {
+                font-size: 5rem; /* Equivalente a text-7xl */
+            }
+        }
+        @media (min-width: 1024px) { /* lg breakpoint */
+            .sponsor-title-transition {
+                font-size: 6rem; /* Equivalente a text-8xl */
+            }
+        }
+
+        .sponsor-title-transition.active {
+            animation: burst-reveal 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, gradient-animation 3s ease infinite alternate; /* Nova animação e gradiente */
+        }
+
+        /* Keyframes para a nova animação de burst-reveal */
+        @keyframes burst-reveal {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+                filter: blur(8px);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.1); /* Overshoot for "burst" */
+                filter: blur(0px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+                filter: blur(0px);
+            }
+        }
+
+        .sponsor-logo-container {
+            position: relative; /* Para posicionar os logos absolutos */
+            width: 250px; /* Largura do contêiner dos logos */
+            height: 150px; /* Altura do contêiner dos logos */
+            margin-top: 40px; /* Espaço entre o título e os logos */
+        }
+
+        .sponsor-logo-item {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 1s ease-in-out; /* Transição de fade para os logos */
+            background-color: transparent; /* Fundo transparente */
+            border-radius: 8px; /* Cantos arredondados para os cards dos logos */
+            box-shadow: none; /* Sem sombra */
+        }
+
+        .sponsor-logo-item.active {
+            opacity: 1;
+        }
+
+        .sponsor-logo {
+            max-width: 90%; /* Ajuste para não encostar nas bordas */
+            max-height: 120px; /* Limite de altura para logos */
+            object-fit: contain; /* Garante que a imagem se ajuste sem cortar */
         }
     </style>
 </head>
@@ -163,63 +284,126 @@
         </div>
     </div>
 
-    <!-- Conteúdo Principal -->
-    <div class="page container mx-auto px-4 sm:px-6 md:px-8 pt-20 pb-12">
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-center mb-10 sm:mb-16 leading-tight">
-            <span class="animated-gradient-text">Jogos Interativos</span>
-        </h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 max-w-5xl mx-auto">
-            <!-- Card 1: Quiz Reprodução Animal -->
-            <div class="bg-white rounded-3xl shadow-xl overflow-hidden transition-all duration-300 hover:scale-105 flex flex-col items-center p-6 sm:p-8 text-center border border-gray-100 reproduction-bg-animation">
-                <i class="fas fa-question-circle text-5xl sm:text-6xl text-accent mb-6 mt-4 relative z-10"></i>
-                <h4 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-4 leading-snug relative z-10">Quiz Reprodução Animal</h4>
-                <p class="text-base sm:text-lg text-gray-600 mb-8 flex-grow relative z-10">
-                    Teste seus conhecimentos sobre a fisiologia e biotecnologias da reprodução bovina de uma forma divertida e interativa.
-                </p>
-                <a href="https://quiz-repro.vercel.app/" target="_blank"
-                   class="jogos-btn-animated font-semibold text-base px-8 py-3 sm:text-lg sm:px-10 sm:py-4 rounded-full inline-flex items-center justify-center shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-opacity-75 relative z-10">
-                    <i class="fas fa-play-circle mr-3"></i> Jogar Agora
-                </a>
+    <!-- Tela de Patrocinadores (Inicialmente oculta) -->
+    <div id="sponsor-screen">
+        <h3 id="sponsor-title" class="mb-12 sponsor-title-transition"></h3>
+        <div class="sponsor-logo-container">
+            <!-- Logos dos patrocinadores - placeholders -->
+            <div class="sponsor-logo-item">
+                <img src="https://placehold.co/200x100/A0A0A0/FFFFFF?text=Laboratorio+A" alt="Logo Laboratório A" class="sponsor-logo">
             </div>
-
-            <!-- Card 2: Classificador de Oócitos -->
-            <div class="bg-white rounded-3xl shadow-xl overflow-hidden transition-all duration-300 hover:scale-105 flex flex-col items-center p-6 sm:p-8 text-center border border-gray-100">
-                <i class="fas fa-microscope text-5xl sm:text-6xl text-accent mb-6 mt-4"></i>
-                <h4 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-4 leading-snug">Classificador de Oócitos</h4>
-                <p class="text-base sm:text-lg text-gray-600 mb-8 flex-grow">
-                    Pratique a classificação de oócitos bovinos com este jogo interativo e aprimore suas habilidades de seleção para o laboratório.
-                </p>
-                <a href="https://class-o-citos.vercel.app/" target="_blank"
-                   class="jogos-btn-animated font-semibold text-base px-8 py-3 sm:text-lg sm:px-10 sm:py-4 rounded-full inline-flex items-center justify-center shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-opacity-75">
-                    <i class="fas fa-play-circle mr-3"></i> Jogar Agora
-                </a>
+            <div class="sponsor-logo-item">
+                <img src="https://placehold.co/200x100/B0B0B0/FFFFFF?text=Laboratorio+B" alt="Logo Laboratório B" class="sponsor-logo">
+            </div>
+            <div class="sponsor-logo-item">
+                <img src="https://placehold.co/200x100/C0C0C0/FFFFFF?text=Laboratorio+C" alt="Logo Laboratório C" class="sponsor-logo">
+            </div>
+            <div class="sponsor-logo-item">
+                <img src="https://placehold.co/200x100/D0D0D0/FFFFFF?text=Laboratorio+D" alt="Logo Laboratório D" class="sponsor-logo">
             </div>
         </div>
     </div>
 
-    <!-- Rodapé -->
-    <footer class="bg-gray-900 text-white py-8 px-4 sm:px-6 md:px-8 text-center mt-12">
-        <div class="max-w-4xl mx-auto">
-            <p class="text-sm sm:text-base mb-4">
-                © 2025 - Mv. Pedro Henrique | Guia de estudos.
-                Desenvolvido por Pedro Henrique com base em conteúdos online.
-            </p>
-            <a href="https://repro-fiv.vercel.app/#/" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105">
-                Voltar para o site de estudos
-            </a>
+    <!-- Conteúdo Principal (Inicialmente oculto) -->
+    <div id="main-content" class="hidden">
+        <div class="page container mx-auto px-4 sm:px-6 md:px-8 pt-20 pb-12">
+            <h2 class="text-3xl sm:text-4xl font-extrabold text-center mb-10 sm:mb-16 leading-tight" id="animated-title-container">
+                <!-- Letras serão inseridas aqui por JS -->
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 max-w-5xl mx-auto">
+                <!-- Card 1: Quiz Reprodução Animal -->
+                <div class="bg-white rounded-3xl shadow-xl overflow-hidden transition-all duration-300 hover:scale-105 flex flex-col items-center p-6 sm:p-8 text-center border border-gray-100 reproduction-bg-animation">
+                    <i class="fas fa-question-circle text-5xl sm:text-6xl text-accent mb-6 mt-4 relative z-10"></i>
+                    <h4 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-4 leading-snug relative z-10">Quiz Reprodução Animal</h4>
+                    <p class="text-base sm:text-lg text-gray-600 mb-8 flex-grow relative z-10">
+                        Teste seus conhecimentos sobre a fisiologia e biotecnologias da reprodução bovina de uma forma divertida e interativa.
+                    </p>
+                    <a href="https://quiz-repro.vercel.app/" target="_blank"
+                       class="jogos-btn-animated font-semibold text-base px-8 py-3 sm:text-lg sm:px-10 sm:py-4 rounded-full inline-flex items-center justify-center shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-opacity-75 relative z-10">
+                        <i class="fas fa-play-circle mr-3"></i> Jogar Agora
+                    </a>
+                </div>
+
+                <!-- Card 2: Classificador de Oócitos -->
+                <div class="bg-white rounded-3xl shadow-xl overflow-hidden transition-all duration-300 hover:scale-105 flex flex-col items-center p-6 sm:p-8 text-center border border-gray-100">
+                    <i class="fas fa-microscope text-5xl sm:text-6xl text-accent mb-6 mt-4"></i>
+                    <h4 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-4 leading-snug">Classificador de Oócitos</h4>
+                    <p class="text-base sm:text-lg text-gray-600 mb-8 flex-grow">
+                        Pratique a classificação de oócitos bovinos com este jogo interativo e aprimore suas habilidades de seleção para o laboratório.
+                    </p>
+                    <a href="https://class-o-citos.vercel.app/" target="_blank"
+                       class="jogos-btn-animated font-semibold text-base px-8 py-3 sm:text-lg sm:px-10 sm:py-4 rounded-full inline-flex items-center justify-center shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-opacity-75">
+                        <i class="fas fa-play-circle mr-3"></i> Jogar Agora
+                    </a>
+                </div>
+            </div>
         </div>
-    </footer>
+
+        <!-- Rodapé -->
+        <footer class="bg-gray-900 text-white py-8 px-4 sm:px-6 md:px-8 text-center mt-12">
+            <div class="max-w-4xl mx-auto">
+                <p class="text-sm sm:text-base mb-4">
+                    © 2025 - Mv. Pedro Henrique | Guia de estudos.
+                    Desenvolvido por Pedro Henrique com base em conteúdos online.
+                </p>
+                <a href="https://repro-fiv.vercel.app/#/" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105">
+                    Voltar para o site de estudos
+                </a>
+            </div>
+        </footer>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const loadingScreen = document.getElementById('loading-screen');
             const loadingProgressFill = document.getElementById('loading-progress-fill');
             const loadingPercentage = document.getElementById('loading-percentage');
+            const sponsorScreen = document.getElementById('sponsor-screen');
+            const mainContent = document.getElementById('main-content');
+            const sponsorTitle = document.getElementById('sponsor-title');
+            const sponsorLogoItems = document.querySelectorAll('.sponsor-logo-item');
 
-            let progress = 0;
-            const intervalTime = 40;
+            const intervalTime = 40; // Milliseconds for each step of the loading animation
             const totalSteps = 100;
 
+            const sponsorScreenInitialDelay = 500; // Delay before sponsor screen becomes active
+            const titleAnimationDuration = 1500; // Duration for fade-in/scale-up animation
+            const titleDisplayDuration = 1500; // How long each title text remains fully visible after animation (shortened)
+            const mobileWordDisplayDuration = 1000; // Duration for each word in mobile sequence
+            const sponsorLogoDisplayDuration = 2000; // 2 seconds per logo
+
+            // Tone.js setup for audio cue
+            const noiseSynth = new Tone.NoiseSynth({
+                noise: {
+                    type: "white" // White noise for a broad spectrum sound
+                },
+                envelope: {
+                    attack: 0.01,  // Very fast attack for a sudden burst
+                    decay: 0.2,   // Quick decay for a short sound
+                    sustain: 0,   // No sustain
+                    release: 0.1  // Fast release
+                }
+            }).toDestination();
+
+            // Function to handle typing effect for a given element
+            const typeText = (element, text, delay = 70) => {
+                return new Promise(resolve => {
+                    element.textContent = ''; // Clear previous text
+                    let i = 0;
+                    const typingInterval = setInterval(() => {
+                        if (i < text.length) {
+                            element.textContent += text.charAt(i);
+                            i++;
+                        } else {
+                            clearInterval(typingInterval);
+                            resolve();
+                        }
+                    }, delay);
+                });
+            };
+
+            // --- Loading Screen Logic ---
+            let progress = 0;
             const loadingInterval = setInterval(() => {
                 if (progress < totalSteps) {
                     progress++;
@@ -227,14 +411,93 @@
                     loadingPercentage.textContent = progress + '%';
                 } else {
                     clearInterval(loadingInterval);
-                    setTimeout(() => {
-                        loadingScreen.classList.add('hidden');
-                        loadingScreen.addEventListener('transitionend', () => {
-                            loadingScreen.remove();
-                        });
-                    }, 500);
+                    loadingScreen.classList.add('hidden'); // Hide loading screen
+
+                    // --- Sponsor Screen Logic ---
+                    setTimeout(async () => { // Activate sponsor screen after initial delay
+                        sponsorScreen.classList.add('active');
+
+                        // 1. Show "Oferecimento" with typing and burst effect
+                        sponsorTitle.style.opacity = 0; // Ensure it starts hidden for burst effect
+                        sponsorTitle.style.transform = 'scale(0.8)'; // Set initial scale for burst
+
+                        await typeText(sponsorTitle, "Oferecimento", 70); // Type out "Oferecimento"
+                        sponsorTitle.classList.add('active'); // Trigger burst-reveal animation after typing
+                        noiseSynth.triggerAttackRelease("8n"); // Play audio cue
+                        
+                        await new Promise(resolve => setTimeout(resolve, titleAnimationDuration + titleDisplayDuration)); // Wait for burst animation + display
+
+                        // Hide "Oferecimento"
+                        sponsorTitle.classList.remove('active'); // Start fade out
+                        await new Promise(resolve => setTimeout(resolve, titleAnimationDuration)); // Wait for fade-out to complete
+
+                        const isMobile = window.innerWidth <= 768; // Check for mobile
+
+                        if (isMobile) {
+                            const mobilePhrase = "Laboratórios FIV disponíveis em Uberaba";
+                            const words = mobilePhrase.split(' ');
+                            
+                            for (let i = 0; i < words.length; i++) {
+                                sponsorTitle.style.opacity = 0; // Ensure it starts hidden for burst effect
+                                sponsorTitle.style.transform = 'scale(0.8)'; // Set initial scale for burst
+                                
+                                await typeText(sponsorTitle, words[i], 70); // Type out each word
+                                sponsorTitle.classList.add('active'); // Trigger burst-reveal for each word
+                                noiseSynth.triggerAttackRelease("8n"); // Play audio cue for each word
+
+                                await new Promise(resolve => setTimeout(resolve, titleAnimationDuration + mobileWordDisplayDuration)); // Wait for word animation + display
+                                sponsorTitle.classList.remove('active'); // Fade out current word
+                                await new Promise(resolve => setTimeout(resolve, titleAnimationDuration)); // Wait for fade-out
+                            }
+                        }
+
+                        // Start cycling logos
+                        let logoCycleIndex = 0;
+                        const showNextLogo = () => {
+                            if (logoCycleIndex > 0) {
+                                sponsorLogoItems[logoCycleIndex - 1].classList.remove('active'); // Hide previous
+                            }
+
+                            if (logoCycleIndex < sponsorLogoItems.length) {
+                                sponsorLogoItems[logoCycleIndex].classList.add('active'); // Show current
+                                logoCycleIndex++;
+                                setTimeout(showNextLogo, sponsorLogoDisplayDuration);
+                            } else {
+                                // All logos displayed
+                                sponsorScreen.classList.remove('active'); // Fade out sponsor screen
+                                mainContent.classList.remove('hidden'); // Show main content immediately
+
+                                sponsorScreen.addEventListener('transitionend', function handleSponsorFadeOutEnd() {
+                                    sponsorScreen.removeEventListener('transitionend', handleSponsorFadeOutEnd);
+                                    sponsorScreen.remove(); // Remove from DOM after fade out
+                                }, { once: true });
+                            }
+                        };
+                        showNextLogo(); // Initiate logo cycle
+
+                    }, sponsorScreenInitialDelay);
                 }
             }, intervalTime);
+
+            // --- Main Content Title Animation Logic (Falling Letters) ---
+            const titleContainer = document.getElementById('animated-title-container');
+            const titleText = "Jogos Interativos";
+            const delayBetweenLetters = 70;
+
+            titleContainer.innerHTML = ''; // Clear existing content
+
+            titleText.split('').forEach((char, index) => {
+                const span = document.createElement('span');
+                span.textContent = char === ' ' ? '\u00A0' : char; // Use non-breaking space for actual spaces
+                span.classList.add('falling-letter', 'animated-gradient-text');
+                span.style.transitionDelay = `${index * delayBetweenLetters}ms`;
+                titleContainer.appendChild(span);
+
+                setTimeout(() => {
+                    span.style.opacity = '1';
+                    span.style.transform = 'translateY(0)';
+                }, 10);
+            });
         });
     </script>
 </body>
