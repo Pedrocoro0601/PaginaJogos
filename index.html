@@ -26,7 +26,7 @@
             color: #3b82f6; /* Equivalente a blue-500 */
         }
 
-        /* Animação de gradiente para o título */
+        /* Animação de gradiente para o título principal */
         .animated-gradient-text {
             background: linear-gradient(to right, #3b82f6, #4f46e5, #3b82f6); /* Gradiente azul para índigo */
             background-size: 200% auto;
@@ -38,7 +38,6 @@
 
         /* Animação de gradiente para os botões */
         .jogos-btn-animated {
-            /* Gradiente mais colorido */
             background: linear-gradient(to right, #ef4444, #f97316, #eab308, #22c55e, #3b82f6, #8b5cf6, #ef4444);
             background-size: 300% auto; /* Tamanho maior para mais movimento */
             color: white;
@@ -50,7 +49,7 @@
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
 
-        /* Keyframes para a animação do gradiente (Título e Botões) */
+        /* Keyframes para as animações de gradiente (Título e Botões) */
         @keyframes gradient-animation {
             0% { background-position: 0% 50%; }
             100% { background-position: 100% 50%; }
@@ -63,8 +62,8 @@
 
         /* Animação para o fundo do card "Quiz Reprodução Animal" */
         .reproduction-bg-animation {
-            position: relative; /* Necessário para posicionamento absoluto do pseudo-elemento */
-            overflow: hidden; /* Garante que a animação permaneça dentro dos limites do card */
+            position: relative;
+            overflow: hidden;
         }
 
         .reproduction-bg-animation::before {
@@ -74,29 +73,17 @@
             left: 50%;
             width: 0;
             height: 0;
-            border-radius: 50%; /* Cria uma forma circular */
-            background: radial-gradient(circle at center, rgba(60, 160, 250, 0.2), transparent 70%); /* Gradiente radial azul suave */
-            transform: translate(-50%, -50%); /* Centraliza o pseudo-elemento */
-            animation: pulsate-repro 4s ease-out infinite; /* Aplica a animação de pulsação */
-            z-index: 0; /* Garante que esteja atrás do conteúdo do card */
+            border-radius: 50%;
+            background: radial-gradient(circle at center, rgba(60, 160, 250, 0.2), transparent 70%);
+            transform: translate(-50%, -50%);
+            animation: pulsate-repro 4s ease-out infinite;
+            z-index: 0;
         }
 
         @keyframes pulsate-repro {
-            0% {
-                width: 0;
-                height: 0;
-                opacity: 0.8;
-            }
-            50% {
-                width: 150%; /* Expande para 150% do tamanho do card */
-                height: 150%;
-                opacity: 0.4;
-            }
-            100% {
-                width: 200%; /* Expande ainda mais e desaparece */
-                height: 200%;
-                opacity: 0;
-            }
+            0% { width: 0; height: 0; opacity: 0.8; }
+            50% { width: 150%; height: 150%; opacity: 0.4; }
+            100% { width: 200%; height: 200%; opacity: 0; }
         }
 
         /* Estilos da Tela de Carregamento */
@@ -106,38 +93,73 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #1a202c; /* Fundo escuro */
+            background-color: #f0f2f5; /* Fundo cinza claro para a página */
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            z-index: 9999; /* Garante que esteja acima de tudo */
-            transition: opacity 1s ease-out; /* Transição suave para o desaparecimento */
+            z-index: 9999;
+            transition: opacity 1s ease-out;
             opacity: 1;
-            pointer-events: all; /* Permite interações enquanto visível */
+            pointer-events: all;
         }
 
         #loading-screen.hidden {
             opacity: 0;
-            pointer-events: none; /* Não bloqueia cliques após desaparecer */
+            pointer-events: none;
         }
 
-        #loading-progress-bar {
-            background-color: #3b82f6; /* Barra de progresso azul */
-            transition: width 0.1s linear; /* Transição suave para a largura */
+        /* O elemento visual principal da animação de carregamento (o "anel" de progresso) */
+        #repro-loading-visual {
+            position: relative;
+            width: 180px; /* Tamanho do anel */
+            height: 180px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #e0e0e0; /* Cor do fundo da barra de progresso (parte não preenchida) */
+            box-shadow: 0 0 30px rgba(60, 160, 250, 0.5); /* Brilho sutil externo */
+            animation: ring-glow 3s ease-in-out infinite alternate; /* Animação de brilho */
+        }
+
+        /* A parte que preenche o anel de progresso (conic-gradient) */
+        #loading-progress-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            /* background será atualizado via JS com o conic-gradient */
+        }
+
+        /* Máscara interna para criar o efeito de anel (borda) */
+        #repro-loading-visual::after {
+            content: '';
+            position: absolute;
+            width: 85%; /* Tamanho do círculo interno para criar a espessura do anel */
+            height: 85%;
+            border-radius: 50%;
+            background-color: #f0f2f5; /* Cor do fundo da tela de carregamento para "cortar" o anel */
+            z-index: 2; /* Acima da barra de progresso, mas abaixo do texto da porcentagem */
+        }
+
+        /* Keyframes para a animação de brilho do anel */
+        @keyframes ring-glow {
+            0% { box-shadow: 0 0 20px rgba(60, 160, 250, 0.5); }
+            100% { box-shadow: 0 0 40px rgba(79, 70, 229, 0.7); }
         }
     </style>
 </head>
 <body>
     <!-- Tela de Carregamento -->
     <div id="loading-screen">
-        <div class="text-white text-4xl sm:text-5xl font-bold mb-8 text-center animated-gradient-text">
-            CARREGANDO JOGO...
+        <!-- O elemento visual principal da animação de carregamento -->
+        <div id="repro-loading-visual">
+            <div id="loading-progress-fill"></div> <!-- A parte que preenche o anel -->
+            <div id="loading-percentage" class="absolute text-gray-700 text-3xl font-semibold z-10">0%</div>
         </div>
-        <div class="w-11/12 sm:w-3/4 md:w-1/2 lg:w-1/3 h-8 bg-gray-700 rounded-full overflow-hidden shadow-lg">
-            <div id="loading-progress-bar" class="h-full rounded-full" style="width: 0%;"></div>
-        </div>
-        <div id="loading-percentage" class="text-white text-2xl font-semibold mt-4">0%</div>
     </div>
 
     <!-- Conteúdo Principal -->
@@ -147,27 +169,27 @@
         </h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 max-w-5xl mx-auto">
             <!-- Card 1: Quiz Reprodução Animal -->
-            <div class="bg-white rounded-3xl shadow-xl overflow-hidden transition-all duration-300 hover:scale-105 flex flex-col items-center p-8 text-center border border-gray-100 reproduction-bg-animation">
-                <i class="fas fa-question-circle text-6xl text-accent mb-6 mt-4 relative z-10"></i>
-                <h4 class="text-3xl font-bold text-gray-800 mb-4 leading-snug relative z-10">Quiz Reprodução Animal</h4>
-                <p class="text-lg text-gray-600 mb-8 flex-grow relative z-10">
+            <div class="bg-white rounded-3xl shadow-xl overflow-hidden transition-all duration-300 hover:scale-105 flex flex-col items-center p-6 sm:p-8 text-center border border-gray-100 reproduction-bg-animation"> <!-- Padding ajustado -->
+                <i class="fas fa-question-circle text-5xl sm:text-6xl text-accent mb-6 mt-4 relative z-10"></i> <!-- Tamanho do ícone ajustado -->
+                <h4 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-4 leading-snug relative z-10">Quiz Reprodução Animal</h4> <!-- Tamanho do título ajustado -->
+                <p class="text-base sm:text-lg text-gray-600 mb-8 flex-grow relative z-10"> <!-- Tamanho do parágrafo ajustado -->
                     Teste seus conhecimentos sobre a fisiologia e biotecnologias da reprodução bovina de uma forma divertida e interativa.
                 </p>
                 <a href="https://quiz-repro.vercel.app/" target="_blank"
-                   class="jogos-btn-animated font-semibold text-lg px-10 py-4 rounded-full inline-flex items-center justify-center shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-opacity-75 relative z-10">
+                   class="jogos-btn-animated font-semibold text-base px-8 py-3 sm:text-lg sm:px-10 sm:py-4 rounded-full inline-flex items-center justify-center shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-opacity-75 relative z-10"> <!-- Tamanho do botão ajustado -->
                     <i class="fas fa-play-circle mr-3"></i> Jogar Agora
                 </a>
             </div>
 
             <!-- Card 2: Classificador de Oócitos -->
-            <div class="bg-white rounded-3xl shadow-xl overflow-hidden transition-all duration-300 hover:scale-105 flex flex-col items-center p-8 text-center border border-gray-100">
-                <i class="fas fa-microscope text-6xl text-accent mb-6 mt-4"></i>
-                <h4 class="text-3xl font-bold text-gray-800 mb-4 leading-snug">Classificador de Oócitos</h4>
-                <p class="text-lg text-gray-600 mb-8 flex-grow">
+            <div class="bg-white rounded-3xl shadow-xl overflow-hidden transition-all duration-300 hover:scale-105 flex flex-col items-center p-6 sm:p-8 text-center border border-gray-100"> <!-- Padding ajustado -->
+                <i class="fas fa-microscope text-5xl sm:text-6xl text-accent mb-6 mt-4"></i> <!-- Tamanho do ícone ajustado -->
+                <h4 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-4 leading-snug">Classificador de Oócitos</h4> <!-- Tamanho do título ajustado -->
+                <p class="text-base sm:text-lg text-gray-600 mb-8 flex-grow"> <!-- Tamanho do parágrafo ajustado -->
                     Pratique a classificação de oócitos bovinos com este jogo interativo e aprimore suas habilidades de seleção para o laboratório.
                 </p>
                 <a href="https://class-o-citos.vercel.app/" target="_blank"
-                   class="jogos-btn-animated font-semibold text-lg px-10 py-4 rounded-full inline-flex items-center justify-center shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-opacity-75">
+                   class="jogos-btn-animated font-semibold text-base px-8 py-3 sm:text-lg sm:px-10 sm:py-4 rounded-full inline-flex items-center justify-center shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-opacity-75"> <!-- Tamanho do botão ajustado -->
                     <i class="fas fa-play-circle mr-3"></i> Jogar Agora
                 </a>
             </div>
@@ -177,32 +199,26 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const loadingScreen = document.getElementById('loading-screen');
-            const loadingProgressBar = document.getElementById('loading-progress-bar');
+            const loadingProgressFill = document.getElementById('loading-progress-fill');
             const loadingPercentage = document.getElementById('loading-percentage');
 
             let progress = 0;
-            const intervalTime = 40; // Milissegundos para cada etapa da animação
-            const totalSteps = 100; // De 0 a 100%
+            const intervalTime = 40;
+            const totalSteps = 100;
 
-            // Inicia o intervalo para simular o carregamento
             const loadingInterval = setInterval(() => {
                 if (progress < totalSteps) {
                     progress++;
-                    // Atualiza a largura da barra de progresso
-                    loadingProgressBar.style.width = progress + '%';
-                    // Atualiza o texto da porcentagem
+                    loadingProgressFill.style.background = `conic-gradient(#3b82f6 ${progress}%, #e0e0e0 ${progress}%)`;
                     loadingPercentage.textContent = progress + '%';
                 } else {
-                    // Quando o carregamento chega a 100%, limpa o intervalo
                     clearInterval(loadingInterval);
-                    // Adiciona um pequeno atraso para que o usuário veja 100% antes de desaparecer
                     setTimeout(() => {
-                        loadingScreen.classList.add('hidden'); // Adiciona a classe 'hidden' para iniciar a transição de opacidade
-                        // Opcional: Remove a tela de carregamento do DOM após a transição
+                        loadingScreen.classList.add('hidden');
                         loadingScreen.addEventListener('transitionend', () => {
                             loadingScreen.remove();
                         });
-                    }, 500); // 0.5 segundo de atraso
+                    }, 500);
                 }
             }, intervalTime);
         });
