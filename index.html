@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogos Interativos</title>
+    <!-- Google Font: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5; /* Fundo cinza claro para a página */
+        }
+        /* Estilos personalizados para uso futuro ou sobreposições específicas */
+        .page {
+            min-height: 100vh;
+        }
+        .text-primary { /* Cor de texto primária personalizada, pode ser ajustada */
+            color: #1a202c; /* Equivalente a gray-900 */
+        }
+        .text-accent { /* Cor de destaque personalizada, pode ser ajustada */
+            color: #3b82f6; /* Equivalente a blue-500 */
+        }
+
+        /* Animação de gradiente para o título */
+        .animated-gradient-text {
+            background: linear-gradient(to right, #3b82f6, #4f46e5, #3b82f6); /* Gradiente azul para índigo */
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-animation 3s ease infinite alternate; /* Animação mais lenta e suave */
+            display: inline-block; /* Essencial para background-clip funcionar */
+        }
+
+        /* Animação de gradiente para os botões */
+        .jogos-btn-animated {
+            /* Gradiente mais colorido */
+            background: linear-gradient(to right, #ef4444, #f97316, #eab308, #22c55e, #3b82f6, #8b5cf6, #ef4444);
+            background-size: 300% auto; /* Tamanho maior para mais movimento */
+            color: white;
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            animation: button-gradient-animation 6s linear infinite; /* Animação mais lenta e contínua */
+        }
+        .jogos-btn-animated:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Keyframes para a animação do gradiente (Título e Botões) */
+        @keyframes gradient-animation {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+
+        @keyframes button-gradient-animation {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+
+        /* Animação para o fundo do card "Quiz Reprodução Animal" */
+        .reproduction-bg-animation {
+            position: relative; /* Necessário para posicionamento absoluto do pseudo-elemento */
+            overflow: hidden; /* Garante que a animação permaneça dentro dos limites do card */
+        }
+
+        .reproduction-bg-animation::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%; /* Cria uma forma circular */
+            background: radial-gradient(circle at center, rgba(60, 160, 250, 0.2), transparent 70%); /* Gradiente radial azul suave */
+            transform: translate(-50%, -50%); /* Centraliza o pseudo-elemento */
+            animation: pulsate-repro 4s ease-out infinite; /* Aplica a animação de pulsação */
+            z-index: 0; /* Garante que esteja atrás do conteúdo do card */
+        }
+
+        @keyframes pulsate-repro {
+            0% {
+                width: 0;
+                height: 0;
+                opacity: 0.8;
+            }
+            50% {
+                width: 150%; /* Expande para 150% do tamanho do card */
+                height: 150%;
+                opacity: 0.4;
+            }
+            100% {
+                width: 200%; /* Expande ainda mais e desaparece */
+                height: 200%;
+                opacity: 0;
+            }
+        }
+
+        /* Estilos da Tela de Carregamento */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #1a202c; /* Fundo escuro */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999; /* Garante que esteja acima de tudo */
+            transition: opacity 1s ease-out; /* Transição suave para o desaparecimento */
+            opacity: 1;
+            pointer-events: all; /* Permite interações enquanto visível */
+        }
+
+        #loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none; /* Não bloqueia cliques após desaparecer */
+        }
+
+        #loading-progress-bar {
+            background-color: #3b82f6; /* Barra de progresso azul */
+            transition: width 0.1s linear; /* Transição suave para a largura */
+        }
+    </style>
+</head>
+<body>
+    <!-- Tela de Carregamento -->
+    <div id="loading-screen">
+        <div class="text-white text-4xl sm:text-5xl font-bold mb-8 text-center animated-gradient-text">
+            CARREGANDO JOGO...
+        </div>
+        <div class="w-11/12 sm:w-3/4 md:w-1/2 lg:w-1/3 h-8 bg-gray-700 rounded-full overflow-hidden shadow-lg">
+            <div id="loading-progress-bar" class="h-full rounded-full" style="width: 0%;"></div>
+        </div>
+        <div id="loading-percentage" class="text-white text-2xl font-semibold mt-4">0%</div>
+    </div>
+
+    <!-- Conteúdo Principal -->
+    <div class="page container mx-auto px-4 sm:px-6 md:px-8 pt-20 pb-12">
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-center mb-10 sm:mb-16 leading-tight">
+            <span class="animated-gradient-text">Jogos Interativos</span>
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 max-w-5xl mx-auto">
+            <!-- Card 1: Quiz Reprodução Animal -->
+            <div class="bg-white rounded-3xl shadow-xl overflow-hidden transition-all duration-300 hover:scale-105 flex flex-col items-center p-8 text-center border border-gray-100 reproduction-bg-animation">
+                <i class="fas fa-question-circle text-6xl text-accent mb-6 mt-4 relative z-10"></i>
+                <h4 class="text-3xl font-bold text-gray-800 mb-4 leading-snug relative z-10">Quiz Reprodução Animal</h4>
+                <p class="text-lg text-gray-600 mb-8 flex-grow relative z-10">
+                    Teste seus conhecimentos sobre a fisiologia e biotecnologias da reprodução bovina de uma forma divertida e interativa.
+                </p>
+                <a href="https://quiz-repro.vercel.app/" target="_blank"
+                   class="jogos-btn-animated font-semibold text-lg px-10 py-4 rounded-full inline-flex items-center justify-center shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-opacity-75 relative z-10">
+                    <i class="fas fa-play-circle mr-3"></i> Jogar Agora
+                </a>
+            </div>
+
+            <!-- Card 2: Classificador de Oócitos -->
+            <div class="bg-white rounded-3xl shadow-xl overflow-hidden transition-all duration-300 hover:scale-105 flex flex-col items-center p-8 text-center border border-gray-100">
+                <i class="fas fa-microscope text-6xl text-accent mb-6 mt-4"></i>
+                <h4 class="text-3xl font-bold text-gray-800 mb-4 leading-snug">Classificador de Oócitos</h4>
+                <p class="text-lg text-gray-600 mb-8 flex-grow">
+                    Pratique a classificação de oócitos bovinos com este jogo interativo e aprimore suas habilidades de seleção para o laboratório.
+                </p>
+                <a href="https://class-o-citos.vercel.app/" target="_blank"
+                   class="jogos-btn-animated font-semibold text-lg px-10 py-4 rounded-full inline-flex items-center justify-center shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-opacity-75">
+                    <i class="fas fa-play-circle mr-3"></i> Jogar Agora
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const loadingScreen = document.getElementById('loading-screen');
+            const loadingProgressBar = document.getElementById('loading-progress-bar');
+            const loadingPercentage = document.getElementById('loading-percentage');
+
+            let progress = 0;
+            const intervalTime = 40; // Milissegundos para cada etapa da animação
+            const totalSteps = 100; // De 0 a 100%
+
+            // Inicia o intervalo para simular o carregamento
+            const loadingInterval = setInterval(() => {
+                if (progress < totalSteps) {
+                    progress++;
+                    // Atualiza a largura da barra de progresso
+                    loadingProgressBar.style.width = progress + '%';
+                    // Atualiza o texto da porcentagem
+                    loadingPercentage.textContent = progress + '%';
+                } else {
+                    // Quando o carregamento chega a 100%, limpa o intervalo
+                    clearInterval(loadingInterval);
+                    // Adiciona um pequeno atraso para que o usuário veja 100% antes de desaparecer
+                    setTimeout(() => {
+                        loadingScreen.classList.add('hidden'); // Adiciona a classe 'hidden' para iniciar a transição de opacidade
+                        // Opcional: Remove a tela de carregamento do DOM após a transição
+                        loadingScreen.addEventListener('transitionend', () => {
+                            loadingScreen.remove();
+                        });
+                    }, 500); // 0.5 segundo de atraso
+                }
+            }, intervalTime);
+        });
+    </script>
+</body>
+</html>
