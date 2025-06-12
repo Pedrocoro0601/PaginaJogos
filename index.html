@@ -10,8 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Tone.js CDN for audio effects -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <!-- Tone.js CDN for audio effects - REMOVED -->
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -394,13 +393,13 @@
             const titleAnimationDuration = 1500; // Duration for fade-in/scale-up animation
             const titleDisplayDuration = 1500; // How long each title text remains fully visible after animation
             const sponsorLogoDisplayDuration = 2000; // 2 seconds per logo
-            const smallAudioDelay = 300; // Small delay AFTER audio trigger to prevent Tone.js errors
+            // const smallAudioDelay = 300; // Small delay AFTER audio trigger to prevent Tone.js errors - REMOVED
 
             // Helper delay function
             const delay = ms => new Promise(res => setTimeout(res, ms));
 
-            // Check if it's a mobile device
-            const isMobileDevice = window.innerWidth <= 768; // Tailwind's 'md' breakpoint
+            // Check if it's a mobile device (more robust)
+            const isMobileDevice = (window.innerWidth <= 768) || ('ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0);
 
             if (!isMobileDevice) {
                 // Display desktop message and hide everything else
@@ -412,18 +411,20 @@
                 return; // Stop further script execution for desktop
             }
 
-            // Tone.js setup for audio cue (only for mobile execution)
+            // Tone.js setup for audio cue - REMOVED, as per user request to remove sounds
+            /*
             const noiseSynth = new Tone.NoiseSynth({
                 noise: {
-                    type: "white" // White noise for a broad spectrum sound
+                    type: "white"
                 },
                 envelope: {
-                    attack: 0.01,  // Very fast attack for a sudden burst
-                    decay: 0.2,   // Quick decay for a short sound
-                    sustain: 0,   // No sustain
-                    release: 0.1  // Fast release
+                    attack: 0.01,
+                    decay: 0.2,
+                    sustain: 0,
+                    release: 0.1
                 }
             }).toDestination();
+            */
 
             // --- Loading Screen Logic ---
             let progress = 0;
@@ -438,7 +439,7 @@
 
                     // --- Sponsor Screen Logic ---
                     setTimeout(async () => { // Activate sponsor screen after initial delay
-                        await Tone.start(); // Ensure audio context is started ONCE
+                        // await Tone.start(); // Ensure audio context is started ONCE - REMOVED
                         sponsorScreen.classList.add('active');
                         await delay(100); // Small pause to allow screen to become active
 
@@ -452,10 +453,10 @@
                             await delay(50); // Small pause to apply initial styles
 
                             sponsorTitle.classList.add('active'); // Trigger burst-reveal animation
-                            noiseSynth.triggerAttackRelease("8n", Tone.now()); // Play audio cue
-                            await delay(smallAudioDelay); // Crucial: Delay after audio trigger
+                            // noiseSynth.triggerAttackRelease("8n", Tone.now()); // Play audio cue - REMOVED
+                            // await delay(smallAudioDelay); // Crucial: Delay after audio trigger - REMOVED
 
-                            await delay(titleAnimationDuration + titleDisplayDuration - smallAudioDelay); // Wait for burst animation + display (adjust for audio delay)
+                            await delay(titleAnimationDuration + titleDisplayDuration); // Wait for burst animation + display
 
                             // Hide "Oferecimento"
                             sponsorTitle.classList.remove('active'); // Start fade out
@@ -469,10 +470,10 @@
                             await delay(50); // Pause to apply initial styles
 
                             sponsorTitle.classList.add('active'); // Trigger burst-reveal for this new text
-                            noiseSynth.triggerAttackRelease("8n", Tone.now()); // Play audio cue
-                            await delay(smallAudioDelay); // Crucial: Delay after audio trigger
+                            // noiseSynth.triggerAttackRelease("8n", Tone.now()); // Play audio cue - REMOVED
+                            // await delay(smallAudioDelay); // Crucial: Delay after audio trigger - REMOVED
 
-                            await delay(titleAnimationDuration + titleDisplayDuration - smallAudioDelay); // Wait for animation + display
+                            await delay(titleAnimationDuration + titleDisplayDuration); // Wait for animation + display
 
                             // Hide this title before logos
                             sponsorTitle.classList.remove('active'); // Start fade out
